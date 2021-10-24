@@ -91,9 +91,9 @@
    (addif (action-col column-vector)
           (G_ "Action"))
    (addif (quantity-col column-vector)
-          (G_ "Quantity"))
+          (G_ "Stunden"))
    (addif (price-col column-vector)
-          (G_ "Unit Price"))
+          (G_ "Stundensatz"))
    (addif (discount-col column-vector)
           (G_ "Discount"))
    (addif (tax-col column-vector)
@@ -114,13 +114,14 @@
         (cons 'invoice (list (cons 'text (G_ "Invoice date, due date, billing ID, terms, job details"))))
         (cons 'today (list (cons 'text (G_ "Today's date"))))
         (cons 'picture (list (cons 'text (G_ "Picture"))))
+        (cons 'title (list (cons 'text (G_ "Title"))))
 
         ;; Translators: "Empty space" refers to invoice header section being left blank
         (cons 'none (list (cons 'text (G_ "Empty space"))))))
 
 (define variant-list
   (list
-   (cons 'invoice (list (cons '1a 'none)
+   (cons 'invoice (list (cons '1a 'title)
                         (cons '1b 'invoice)
                         (cons '2a 'client)
                         (cons '2b 'company)
@@ -128,7 +129,7 @@
                         (cons '3b 'today)
                         (cons 'css base-css)))
 
-   (cons 'easy-invoice (list (cons '1a 'none)
+   (cons 'easy-invoice (list (cons '1a 'title)
                              (cons '1b 'invoice)
                              (cons '2a 'client)
                              (cons '2b 'company)
@@ -233,7 +234,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
    (gnc:make-simple-boolean-option
     (N_ "Display Columns") (N_ "Tax Amount")
     "m" (N_ "Display each entry's total total tax?") #f))
-
+	
   (gnc:register-inv-option
    (gnc:make-simple-boolean-option
     (N_ "Display Columns") (N_ "Total")
@@ -286,7 +287,17 @@ for styling the invoice. Please see the exported report for the CSS class names.
    (gnc:make-simple-boolean-option
     (N_ "Display") (N_ "Use Detailed Tax Summary")
     "o" (N_ "Display all tax categories separately (one per line) instead of one single tax line.?") #f))
-
+	
+  (gnc:register-inv-option
+   (gnc:make-simple-boolean-option
+    (N_ "Display") (N_ "Show invoice number in title")
+    "o" (N_ "Use invoice number in title, e.g. Invoice Nr. 0001?") #f))
+	
+  (gnc:register-inv-option
+   (gnc:make-simple-boolean-option
+    (N_ "Display") (N_ "Display Tax Total")
+    "o" (N_ "Display the invoice total tax at the end of your invoice?") #f))
+	
   (gnc:register-inv-option (gnc:make-internal-option "Display" "Totals" #t))
 
   (gnc:register-inv-option
@@ -384,6 +395,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
 
   (let ((show-payments (opt-val "Display" "Payments"))
         (display-all-taxes (opt-val "Display" "Use Detailed Tax Summary"))
+        (display-tax-total (opt-val "Display" "Display Tax Total"))
         (display-subtotal? (opt-val "Display" "Subtotal"))
         (lot (gncInvoiceGetPostedLot invoice))
         (txn (gncInvoiceGetPostedTxn invoice))
@@ -534,8 +546,11 @@ for styling the invoice. Please see the exported report for the CSS class names.
                    (gncInvoiceGetTotalTaxList invoice))
 
                   ;; nope, just show the total tax.
-                  (add-subtotal-row (gncInvoiceGetTotalTax invoice)
-                                    "grand-total" (G_ "Tax")))
+                  (if display-tax-total
+                              (add-subtotal-row (gncInvoiceGetTotalTax invoice)
+                                                "grand-total" (G_ "Tax"))
+                  )
+			        )
 
               (add-subtotal-row (gncInvoiceGetTotal invoice)
                                 "grand-total" (G_ "Total Price"))
@@ -585,6 +600,30 @@ for styling the invoice. Please see the exported report for the CSS class names.
     (if (gncInvoiceIsPosted invoice)
 
         (begin
+        
+          
+          (gnc:html-table-append-row!
+           invoice-details-table
+           (list
+              (G_"Rechnungsnummer ") 
+              (gnc:make-html-div/markup
+              "invoice-number"
+              (gncInvoiceGetID invoice)
+              )
+           )
+          )
+          
+          (gnc:html-table-append-row!
+           invoice-details-table
+           (list
+              (G_ "Rechnungsbetrag ")
+              (gnc:make-html-div/markup
+                "invoice-number"
+                (gncInvoiceGetTotal invoice) "€"
+              )
+           )
+          )
+
           (gnc:html-table-append-row!
            invoice-details-table
            (make-date-row (G_ "Date") (gncInvoiceGetDatePosted invoice) date-format))
@@ -688,9 +727,9 @@ for styling the invoice. Please see the exported report for the CSS class names.
 
 (define (make-date-row label date date-format)
   (list
-   (string-append label ":")
+   label
    (gnc:make-html-div/markup
-    "div-align-right"
+    "invoice-date"
     (gnc-print-time64 date date-format))))
 
 (define (make-company-table book)
@@ -784,11 +823,20 @@ for styling the invoice. Please see the exported report for the CSS class names.
                ;; Translators: This is the format of the invoice title.
                ;; The first ~a is "Invoice", "Credit Note"... and the second the number.
                ;; Replace " #" by whatever is common as number abbreviation, i.e. "~a Nr. ~a"
-               (invoice-title (format #f (G_"~a #~a") title (gncInvoiceGetID invoice)))
+               
+                (invoice-title
+                 (if (opt-val "Display" "Show invoice number in title")
+                  (format #f (G_"~a #~a") title (gncInvoiceGetID invoice))
+                   title
+                 )
+                )
                (layout-lookup-table (list (cons 'none #f)
                                           (cons 'picture (gnc:make-html-div/markup
                                                           "picture"
                                                           (make-img (opt-val "Layout" "Picture Location"))))
+                                          (cons 'title (gnc:make-html-div/markup
+                                                        "invoice-title"
+													                            	invoice-title))
                                           (cons 'invoice (gnc:make-html-div/markup
                                                           "invoice-details-table"
                                                           (make-invoice-details-table
@@ -802,7 +850,12 @@ for styling the invoice. Please see the exported report for the CSS class names.
                                                           (make-company-table book)))
                                           (cons 'today (gnc:make-html-div/markup
                                                         "invoice-print-date"
-                                                        (qof-print-date (current-time))))))
+													                            	(G_ "Rechnungsdatum: ")
+                                                        (qof-print-date (current-time))
+														)
+										  )
+									)
+				        )
                (layout-lookup (lambda (loc) (cdr (assq (opt-val "Layout" loc) layout-lookup-table)))))
 
           (gnc:html-document-set-style-text! document (opt-val "Layout" "CSS"))
@@ -810,26 +863,21 @@ for styling the invoice. Please see the exported report for the CSS class names.
           (let ((main-table (gnc:make-html-table)))
 
             (gnc:html-table-append-row! main-table
-                                        (gnc:make-html-table-cell/size
-                                         1 2 (gnc:make-html-div/markup
-                                              "invoice-title" invoice-title)))
-
-            (gnc:html-table-append-row! main-table
                                         (list (layout-lookup "Row 1 Left")
                                               (gnc:make-html-div/markup
-                                               "div-align-right"
+                                               "row-1-right div-align-right"
                                                (layout-lookup "Row 1 Right"))))
 
             (gnc:html-table-append-row! main-table
                                         (list (layout-lookup "Row 2 Left")
                                               (gnc:make-html-div/markup
-                                               "div-align-right"
+                                               "row-2-right div-align-right"
                                                (layout-lookup "Row 2 Right"))))
 
             (gnc:html-table-append-row! main-table
                                         (list (layout-lookup "Row 3 Left")
                                               (gnc:make-html-div/markup
-                                               "div-align-right"
+                                               "row-3-right div-align-right"
                                                (layout-lookup "Row 3 Right"))))
 
             (gnc:html-table-append-row! main-table
@@ -872,7 +920,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
             (gnc:html-table-append-row! main-table
                                         (gnc:make-html-table-cell/size
                                          1 2 (gnc:make-html-div/markup
-                                              "invoice-notes"
+                                              "invoice-notes-extra"
                                               (multiline-to-html-text
                                                (opt-val "Display" "Extra Notes")))))
 

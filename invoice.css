@@ -1,0 +1,128 @@
+/* This is the user-defined content that the modified invoice.scm was created for.
+   It works best with the following settings:
+   - Row 1 left: Empty
+   - Row 1 right: Company name, Address and tax-ID
+   - Row 2 left: Title
+   - Row 2 right: Empty
+   - Row 3 left: Client or vendor name, address and ID
+   - Row 3 right: Invoice date, due date, billing ID, etc.
+*/
+
+/** Default rules **/
+.div-align-right { float: right; }
+.div-align-right .maybe-align-right { text-align: right }
+.entries-table * { border-width: 1px; border-style:solid; border-collapse: collapse}
+.entries-table > table { width: 100% }
+.company-table > table * { padding: 0px; }
+.client-table > table * { padding: 0px; }
+.invoice-details-table > table * { padding: 0px; }
+@media print { .main-table > table { width: 100%; }}
+@media print { .main-table { width: 100%; }}
+
+.invoice-in-progress { visibility:hidden; }
+.main-table > table { margin: auto }
+.invoice-details-table > table { display: block; }
+.invoice-notes { margin-top: 20px }
+.entries-table > table { min-width: 600px }
+
+/** Custom rules **/
+
+.entries-table tr:nth-child(odd) {
+    background-color: lightgray;
+}
+td.number-cell {
+    font-size: 12px;
+}
+body, p, table, tr, td {
+    font-size: 14px;
+}
+
+/* Get base information in a nice, little container box */
+.invoice-details-table {
+    background-color: #4a9f99;
+    padding: 16px;
+}
+
+.invoice-details-table > table * {
+    color: white;
+}
+
+.invoice-details-table > table > tbody > tr > td:last-child {
+    padding-left: 29px;
+}
+
+/* Make the invoice title important, but not too heavy */
+
+.invoice-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #548b88;
+    font-size: x-large;
+}
+
+/* let the content breathe, especially for PDFs */
+
+.entries-table > table > thead > tr > th {
+    padding: 16px;
+}
+
+body > div > table > tbody > tr > td {
+    padding-top: 28px;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+body > div > table > tbody > tr:first-child {
+    background-color: #1d6e6a;
+    color: white;
+}
+
+body > div > table > tbody > tr:last-child {
+    background-color: #424141;
+    color: white;
+}
+/* get the bottom/top-box enough padding to fill out the page, but let the text breathe */
+body > div > table > tbody > tr:last-child > td,
+body > div > table > tbody > tr:first-child > td {
+    padding: 24px;
+}
+.invoice-notes-extra {
+    margin-top: 0;
+}
+
+/* get left text over table more to the right for a nicer print look*/
+@media print {
+  body > div > table > tbody > tr:nth-child(2) > td:first-child,
+  body > div > table > tbody > tr:nth-child(3) > td:first-child {
+      padding-left: 48px;
+  }
+}
+/* And now: Make the table look good for whole-page-prints */
+.entries-table * {
+    border: none;
+    padding: 10px 16px;
+}
+@media print {
+    .entries-table * {
+        padding: 10px 36px !important;
+    }
+}
+.entries-table > table > thead > tr > th:first-child {
+    text-align: start !important;
+}
+.entries-table > table > thead > tr > th:not(:first-child) {
+    text-align: end;
+}
+.entries-table > table > thead > tr {
+    background-color: #548b88 !important;
+    color: white !important;
+}
+
+/* Last, but not least: Make the open total sum look important */
+.total-number-cell {
+    color: #548b88;
+}
+
+.total-label-cell {
+    text-align: end;
+}
