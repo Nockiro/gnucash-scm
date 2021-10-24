@@ -2,6 +2,7 @@
 ;; invoice.scm -- an Invoice Report, used to print a GncInvoice
 ;;
 ;; Created by:  Derek Atkins <warlord@MIT.EDU>
+;; Extended by: Robin Freund <info@nockiro.de>
 ;; Copyright (c) 2002, 2003 Derek Atkins <warlord@MIT.EDU>
 ;;
 ;; This program is free software; you can redistribute it and/or
@@ -33,15 +34,9 @@
 
 (define (addif pred . data) (if pred data '()))
 
-(define base-css "/* advanced users only */
-.div-align-right { float: right; }
-.div-align-right .maybe-align-right { text-align: right }
-.entries-table * { border-width: 1px; border-style:solid; border-collapse: collapse}
-.entries-table > table { width: 100% }
-.company-table > table * { padding: 0px; }
-.client-table > table * { padding: 0px; }
-.invoice-details-table > table * { padding: 0px; }
-@media print { .main-table > table { width: 100%; }}
+(define base-css "
+/* Full source can be found in invoice.css */
+.div-align-right{float:right}.div-align-right .maybe-align-right{text-align:right}.entries-table *{border-width:1px;border-style:solid;border-collapse:collapse}.entries-table>table{width:100%}.company-table>table *{padding:0}.client-table>table *{padding:0}.invoice-details-table>table *{padding:0}.invoice-in-progress{visibility:hidden}.invoice-details-table>table{display:block}.invoice-notes{margin-top:20px}.entries-table>table{min-width:600px}.entries-table tr:nth-child(odd){background-color:#d3d3d3}td.number-cell{font-size:12px}body,p,table,td,tr{font-size:14px}.main-table>table{margin:auto;min-height:100vh}@media print{.main-table>table{min-width:100vw}}.invoice-details-table{background-color:#4a9f99;padding:16px}.invoice-details-table>table *{color:#fff}.invoice-details-table>table>tbody>tr>td:last-child{padding-left:29px}.invoice-title{font-weight:700;text-transform:uppercase;color:#548b88;font-size:x-large}.entries-table>table>thead>tr>th{padding:16px}body>div>table>tbody>tr>td{padding-top:28px;padding-left:0;padding-right:0}body>div>table>tbody>tr:first-child{background-color:#1d6e6a;color:#fff}body>div>table>tbody>tr:last-child{background-color:#424141;color:#fff}body>div>table>tbody>tr:first-child>td,body>div>table>tbody>tr:last-child>td{padding:24px}.invoice-notes-extra{margin-top:0}@media print{body>div>table>tbody>tr:nth-child(2)>td:first-child,body>div>table>tbody>tr:nth-child(3)>td:first-child{padding-left:48px}}.entries-table td{padding:10px 28px}.entries-table *{border:none}.entries-table>table>thead>tr>th:first-child{text-align:start!important;padding-left:28px}.entries-table>table>thead>tr>th:not(:first-child){text-align:end}.entries-table>table>thead>tr{background-color:#548b88!important;color:#fff!important}.total-number-cell{color:#548b88}.total-label-cell{text-align:end}
 ")
 
 (define (date-col columns-used)
@@ -123,37 +118,13 @@
 
 (define variant-list
   (list
-   (cons 'invoice (list (cons '1a 'title)
-                        (cons '1b 'invoice)
-                        (cons '2a 'client)
-                        (cons '2b 'company)
-                        (cons '3a 'none)
-                        (cons '3b 'today)
-                        (cons 'css base-css)))
-
-   (cons 'easy-invoice (list (cons '1a 'title)
-                             (cons '1b 'invoice)
-                             (cons '2a 'client)
-                             (cons '2b 'company)
-                             (cons '3a 'none)
-                             (cons '3b 'today)
-                             (cons 'css (string-append base-css "
-.invoice-in-progress { color:red }
-.invoice-title { font-weight: bold; text-decoration: underline }
-.main-table > table { margin: auto }
-.invoice-details-table > table { display: block; }
-.invoice-notes { margin-top: 20px }
-.entries-table > table { min-width: 600px }"))))
-
-   (cons 'fancy-invoice (list (cons '1a 'company)
-                              (cons '1b 'invoice)
-                              (cons '2a 'client)
-                              (cons '2b 'company)
-                              (cons '3a 'none)
-                              (cons '3b 'none)
-                              (cons 'css (string-append base-css "
-.company-name {font-size: x-large; }
-.client-name {font-size: x-large; }"))))))
+   (cons 'invoice (list (cons '1a 'company-base)
+                        (cons '1b 'company-contact)
+                        (cons '2a 'title)
+                        (cons '2b 'none)
+                        (cons '3a 'client)
+                        (cons '3b 'invoice)
+                        (cons 'css base-css)))))
 
 (define (keylist-get-info keylist key info)
   (cdr (assq info (cdr (assq key keylist)))))
@@ -1011,34 +982,14 @@ for styling the invoice. Please see the exported report for the CSS class names.
 
     document))
 
-(define invoice-report-guid "5123a759ceb9483abf2182d01c140e8d")
-(define easy-invoice-guid "67112f318bef4fc496bdc27d106bbda4")
-(define fancy-invoice-guid "3ce293441e894423a2425d7a22dd1ac6")
+(define invoice-report-guid "7524d487e3ce431680fa0a694150222b")
 
 (gnc:define-report
  'version 1
- 'name (N_ "Printable Invoice")
+ 'name (N_ "HTML-exportable invoice")
  'report-guid invoice-report-guid
  'menu-path (list gnc:menuname-business-reports)
  'options-generator (lambda () (options-generator 'invoice))
- 'renderer reg-renderer
- 'in-menu? #t)
-
-(gnc:define-report
- 'version 1
- 'name (N_ "Easy Invoice")
- 'report-guid easy-invoice-guid
- 'menu-path (list gnc:menuname-business-reports)
- 'options-generator (lambda () (options-generator 'easy-invoice))
- 'renderer reg-renderer
- 'in-menu? #t)
-
-(gnc:define-report
- 'version 1
- 'name (N_ "Fancy Invoice")
- 'report-guid fancy-invoice-guid
- 'menu-path (list gnc:menuname-business-reports)
- 'options-generator (lambda () (options-generator 'fancy-invoice))
  'renderer reg-renderer
  'in-menu? #t)
 
