@@ -110,7 +110,9 @@
 
 (define layout-key-list
   (list (cons 'client (list (cons 'text (G_ "Client or vendor name, address and ID"))))
-        (cons 'company (list (cons 'text (G_ "Company name, address and tax-ID"))))
+        (cons 'company (list (cons 'text (G_ "All company information at once"))))
+        (cons 'company-base (list (cons 'text (G_ "Company name, address and tax-ID"))))
+        (cons 'company-contact (list (cons 'text (G_ "Phone number, mail, fax, URL"))))
         (cons 'invoice (list (cons 'text (G_ "Invoice date, due date, billing ID, terms, job details"))))
         (cons 'today (list (cons 'text (G_ "Today's date"))))
         (cons 'picture (list (cons 'text (G_ "Picture"))))
@@ -757,6 +759,55 @@ for styling the invoice. Please see the exported report for the CSS class names.
     "invoice-date"
     (gnc-print-time64 date date-format))))
 
+(define (make-company-base-table book)
+  ;; single-column table. my name, address, and printdate
+  (let* ((table (gnc:make-html-table))
+         (name (gnc:company-info book gnc:*company-name*))
+         (addy (gnc:company-info book gnc:*company-addy*)))
+
+    (if (and name (not (string-null? name)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                            "maybe-align-right company-name" name))))
+
+    (if (and addy (not (string-null? addy)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                            "maybe-align-right company-address" (multiline-to-html-text addy)))))
+
+    table))
+
+(define (make-company-contact-table book)
+  ;; single-column table. my phone, fax, mail and url
+  (let* ((table (gnc:make-html-table))
+         (phone (gnc:company-info book gnc:*company-phone*))
+         (fax (gnc:company-info book gnc:*company-fax*))
+         (email (gnc:company-info book gnc:*company-email*))
+         (url (gnc:company-info book gnc:*company-url*)))
+
+
+    (if (and phone (not (string-null? phone)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                           "maybe-align-right company-phone" phone))))
+
+    (if (and fax (not (string-null? fax)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                            "maybe-align-right company-fax" fax))))
+
+    (if (and email (not (string-null? email)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                            "maybe-align-right company-email" email))))
+
+    (if (and url (not (string-null? url)))
+        (gnc:html-table-append-row! table (list
+                                           (gnc:make-html-div/markup
+                                            "maybe-align-right company-url" url))))
+
+    table))
+
 (define (make-company-table book)
   ;; single-column table. my name, address, and printdate
   (let* ((table (gnc:make-html-table))
@@ -873,6 +924,12 @@ for styling the invoice. Please see the exported report for the CSS class names.
                                           (cons 'company (gnc:make-html-div/markup
                                                           "company-table"
                                                           (make-company-table book)))
+                                          (cons 'company-base (gnc:make-html-div/markup
+                                                              "company-table"
+                                                              (make-company-base-table book)))
+                                          (cons 'company-contact (gnc:make-html-div/markup
+                                                                  "company-table-contact"
+                                                                  (make-company-contact-table book)))
                                           (cons 'today (gnc:make-html-div/markup
                                                         "invoice-print-date"
 													                            	(G_ "Rechnungsdatum: ")
@@ -984,3 +1041,4 @@ for styling the invoice. Please see the exported report for the CSS class names.
  'options-generator (lambda () (options-generator 'fancy-invoice))
  'renderer reg-renderer
  'in-menu? #t)
+
