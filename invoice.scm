@@ -297,6 +297,11 @@ for styling the invoice. Please see the exported report for the CSS class names.
    (gnc:make-simple-boolean-option
     (N_ "Display") (N_ "Display Tax Total")
     "o" (N_ "Display the invoice total tax at the end of your invoice?") #f))
+
+  (gnc:register-inv-option
+   (gnc:make-simple-boolean-option
+    (N_ "Display") (N_ "Hide zero-value Amounts/Sum")
+    "o" (N_ "If the amount or sum of one row is 0, should the value be hidden?") #f))
 	
   (gnc:register-inv-option (gnc:make-internal-option "Display" "Totals" #t))
 
@@ -396,6 +401,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
   (let ((show-payments (opt-val "Display" "Payments"))
         (display-all-taxes (opt-val "Display" "Use Detailed Tax Summary"))
         (display-tax-total (opt-val "Display" "Display Tax Total"))
+        (hide-zero-value (opt-val "Display" "Hide zero-value Amounts/Sum"))
         (display-subtotal? (opt-val "Display" "Subtotal"))
         (lot (gncInvoiceGetPostedLot invoice))
         (txn (gncInvoiceGetPostedTxn invoice))
@@ -459,17 +465,28 @@ for styling the invoice. Please see the exported report for the CSS class names.
                  (gncEntryGetAction entry))
 
           (addif (quantity-col used-columns)
-                 (gnc:make-html-table-cell/markup
+              (if (or (not hide-zero-value) (> (gncEntryGetDocQuantity entry credit-note?) 0))
+                (gnc:make-html-table-cell/markup
                   "number-cell"
-                  (gncEntryGetDocQuantity entry credit-note?)))
+                  (gncEntryGetDocQuantity entry credit-note?))
+                ;; if no value is to be shown, create empty cell
+                (gnc:make-html-table-cell/markup "number-cell" "")
+              )
+          )
 
           (addif (price-col used-columns)
-                 (gnc:make-html-table-cell/markup
+              (if (or (not hide-zero-value) (> (if cust-doc? (gncEntryGetInvPrice entry) (gncEntryGetBillPrice entry)) 0))
+                (gnc:make-html-table-cell/markup
                   "number-cell"
-                  (gnc:make-gnc-monetary
-                   currency (if cust-doc?
-                                (gncEntryGetInvPrice entry)
-                                (gncEntryGetBillPrice entry)))))
+                  
+                      (gnc:make-gnc-monetary
+                        currency 
+                        (if cust-doc? (gncEntryGetInvPrice entry) (gncEntryGetBillPrice entry))
+                      ))
+                ;; if no value is to be shown, create empty cell
+                (gnc:make-html-table-cell/markup "number-cell" "")
+              )
+          ) 
 
           (addif (discount-col used-columns)
                  (if cust-doc?
@@ -496,10 +513,18 @@ for styling the invoice. Please see the exported report for the CSS class names.
                    currency (gncEntryGetDocTaxValue entry #t cust-doc? credit-note?))))
 
           (addif (value-col used-columns)
-                 (gnc:make-html-table-cell/markup
-                  "number-cell"
+              (if (or (not hide-zero-value) (> (gncEntryGetDocValue entry #t cust-doc? credit-note?) 0))
+                (gnc:make-html-table-cell/markup
+                  "number-cell"                  
                   (gnc:make-gnc-monetary
-                   currency (gncEntryGetDocValue entry #t cust-doc? credit-note?)))))))
+                    currency 
+                    (gncEntryGetDocValue entry #t cust-doc? credit-note?)
+                  ))
+                ;; if no value is to be shown, create empty cell
+                (gnc:make-html-table-cell/markup "number-cell" "")
+              )
+          ) 
+          )))
 
       (define (add-subtotal-row subtotal subtotal-style subtotal-label)
         (gnc:html-table-append-row/markup!
