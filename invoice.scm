@@ -77,7 +77,21 @@
    (opt-val "Display Columns" "Tax Amount")
    (opt-val "Display Columns" "Total")))
 
-(define (make-heading-list column-vector)
+(define (custom-coltitle-quantity options)
+  (define (opt-val section name)
+    (gnc:option-value
+     (gnc:lookup-option options section name)))
+	 
+	(opt-val gnc:pagename-general "Name of quantity column"))
+
+(define (custom-coltitle-price options)
+  (define (opt-val section name)
+    (gnc:option-value
+     (gnc:lookup-option options section name)))
+	 
+	(opt-val gnc:pagename-general "Name of price column"))        
+
+(define (make-heading-list column-vector options)
   (append
    (addif (date-col column-vector)
           (G_ "Date"))
@@ -86,9 +100,9 @@
    (addif (action-col column-vector)
           (G_ "Action"))
    (addif (quantity-col column-vector)
-          (G_ "Stunden"))
+          (custom-coltitle-quantity options))
    (addif (price-col column-vector)
-          (G_ "Stundensatz"))
+          (custom-coltitle-price options))
    (addif (discount-col column-vector)
           (G_ "Discount"))
    (addif (tax-col column-vector)
@@ -156,7 +170,19 @@
     gnc:pagename-general (N_ "Custom Title")
     "z" (N_ "A custom string to replace Invoice, Bill or Expense Voucher.")
     ""))
-
+		
+  (gnc:register-inv-option
+   (gnc:make-string-option
+    gnc:pagename-general (N_ "Name of quantity column")
+    "z" (N_ "A custom string to replace the name of the quantity column.")
+    (G_ "Quantity")))
+	
+  (gnc:register-inv-option
+   (gnc:make-string-option
+    gnc:pagename-general (N_ "Name of price column")
+    "z" (N_ "A custom string to replace the name of the price column.")
+    (G_ "Unit Price")))
+		
   (gnc:register-inv-option
    (gnc:make-text-option
     (N_ "Layout") (N_ "CSS") "zz" (N_ "CSS code. This field specifies the CSS code \
@@ -273,7 +299,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
 
   (gnc:register-inv-option
    (gnc:make-simple-boolean-option
-    (N_ "Display") (N_ "Hide zero-value Amounts/Sum")
+    (N_ "Display") (N_ "Hide zero-value amounts/sum")
     "o" (N_ "If the amount or sum of one row is 0, should the value be hidden?") #f))
 	
   (gnc:register-inv-option
@@ -508,7 +534,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
                 (display-subtotal (gnc:make-gnc-monetary currency subtotal) used-columns)))))
 
       (gnc:html-table-set-col-headers! table
-                                       (make-heading-list used-columns))
+                                       (make-heading-list used-columns options))
 
       (let do-rows-with-subtotals ((entries entries)
                                    (odd-row? #t)
@@ -622,7 +648,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
 
           (gnc:html-table-append-row!
            invoice-details-table
-           (make-date-row (G_ "Date") (gncInvoiceGetDatePosted invoice) date-format))
+           (make-date-row (G_ "Invoice Date") (gncInvoiceGetDatePosted invoice) date-format))
 
           (if (opt-val "Display" "Due Date")
               (gnc:html-table-append-row!
@@ -901,7 +927,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
                                                                   (make-company-contact-table book)))
                                           (cons 'today (gnc:make-html-div/markup
                                                         "invoice-print-date"
-													                            	(G_ "Rechnungsdatum: ")
+													    (G_ "Invoice date") ": "
                                                         (qof-print-date (current-time))
 														)
 										  )
