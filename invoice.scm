@@ -372,7 +372,7 @@ for styling the invoice. Please see the exported report for the CSS class names.
   (let ((show-payments (opt-val "Display" "Payments"))
         (display-all-taxes (opt-val "Display" "Use Detailed Tax Summary"))
         (display-tax-total (opt-val "Display" "Display Tax Total"))
-        (hide-zero-value (opt-val "Display" "Hide zero-value Amounts/Sum"))
+        (hide-zero-value (opt-val "Display" "Hide zero-value amounts/sum"))
         (display-subtotal? (opt-val "Display" "Subtotal"))
         (lot (gncInvoiceGetPostedLot invoice))
         (txn (gncInvoiceGetPostedTxn invoice))

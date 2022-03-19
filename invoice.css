@@ -81,11 +81,20 @@ body > div > table > tbody > tr > td {
 body > div > table > tbody > tr:first-child {
     background-color: #1d6e6a;
     color: white;
+    /* height: 0 forces the rows to be as small as possible for its content */
+    height: 0;
+}
+
+/* every row but the main content should be fit to content */
+body > div > table > tbody > :not(tr:nth-child(4)) {
+    height: 0;
 }
 
 body > div > table > tbody > tr:last-child {
     background-color: #424141;
     color: white;
+    /* height: 0 forces the rows to be as small as possible for its content */
+    height: 0;
 }
 /* get the bottom/top-box enough padding to fill out the page, but let the text breathe */
 body > div > table > tbody > tr:last-child > td,
