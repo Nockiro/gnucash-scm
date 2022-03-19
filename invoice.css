@@ -85,6 +85,11 @@ body > div > table > tbody > tr:first-child {
     height: 0;
 }
 
+/* make meta information look like a little less important */
+small {
+    color: gray;
+}
+
 /* every row but the main content should be fit to content */
 body > div > table > tbody > :not(tr:nth-child(4)) {
     height: 0;
