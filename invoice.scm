@@ -276,8 +276,6 @@ for styling the invoice. Please see the exported report for the CSS class names.
     (N_ "Display") (N_ "Hide zero-value Amounts/Sum")
     "o" (N_ "If the amount or sum of one row is 0, should the value be hidden?") #f))
 	
-  (gnc:register-inv-option (gnc:make-internal-option "Display" "Totals" #t))
-
   (gnc:register-inv-option
    (gnc:make-simple-boolean-option
     (N_ "Display") (N_ "References")
