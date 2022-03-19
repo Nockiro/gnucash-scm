@@ -122,11 +122,22 @@ body > div > table > tbody > tr:first-child > td {
     color: white !important;
 }
 
-/* Last, but not least: Make the open total sum look important */
+/* Make the open total sum look important */
 .total-number-cell {
     color: #548b88;
 }
 
 .total-label-cell {
     text-align: end;
+}
+
+/* Make the customer look important */
+.client-name {
+    font-weight: bold;
+}
+
+/** GnuCash 4.7 - 4.9 adjustments **/
+/* prevent borders */
+html, body {
+    margin: 0;
 }
