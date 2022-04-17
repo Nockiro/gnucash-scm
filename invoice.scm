@@ -465,7 +465,9 @@ for styling the invoice. Please see the exported report for the CSS class names.
               (if (or (not hide-zero-value) (> (gncEntryGetDocQuantity entry credit-note?) 0))
                 (gnc:make-html-table-cell/markup
                   "number-cell"
-                  (gncEntryGetDocQuantity entry credit-note?))
+                  (xaccPrintAmount
+                   (gncEntryGetDocQuantity entry credit-note?)
+                   (gnc-default-print-info #f)))
                 ;; if no value is to be shown, create empty cell
                 (gnc:make-html-table-cell/markup "number-cell" "")
               )
