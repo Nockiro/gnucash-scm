@@ -6,6 +6,7 @@ In this repository I want to collect GnuCash reports/templates (written in [Guil
 ### invoice.scm
 Since the default gnucash reports are (in my opinion) very helpful, but lack a bit in their design, I wanted to create a template that I myself can use to some extend.  
 The file and its corresponding css-file (for use in GnuCash report settings) are the result of that.  
+*Note: invoice.4.scm contains the content designed for GnuCash 4 while invoice.scm is designed for GnuCash 5.*
 
 Disclaimer: The design itself is based on an earlier version of the [InvoiceNinja v4 Bold Theme](https://invoiceninja.github.io/).
 
