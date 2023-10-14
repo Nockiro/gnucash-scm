@@ -164,6 +164,16 @@
     "z" (N_ "A custom string to replace Invoice, Bill or Expense Voucher.")
     "")
 
+  (gnc-register-string-option options
+    gnc:pagename-general (N_ "Name of quantity column")
+    "z" (N_ "A custom string to replace the name of the quantity column.")
+    (G_ "Quantity"))
+
+  (gnc-register-string-option options
+    gnc:pagename-general (N_ "Name of price column")
+    "z" (N_ "A custom string to replace the name of the price column.")
+    (G_ "Unit Price"))
+
   (gnc-register-text-option options
     (N_ "Layout") (N_ "CSS") "zz" (N_ "CSS code. This field specifies the CSS code \
 for styling the invoice. Please see the exported report for the CSS class names.")
