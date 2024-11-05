@@ -39,7 +39,7 @@ body, p, table, tr, td {
 
 @media print {
     .main-table > table { 
-        min-width: 100vw; 
+        max-width: 100vw; 
     }
 }
 
