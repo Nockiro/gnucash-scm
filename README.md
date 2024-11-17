@@ -28,7 +28,7 @@ This repository is based on the assumption that you're running GnuCash version 4
 
 You can read detailed instructions [on the GnuCash Wiki](https://wiki.gnucash.org/wiki/Custom_Reports#Loading_Your_Report), but basically (with the example of invoice.scm) it comes down to this:
 
-1. Save the invoice.scm file on your GNC_DATA_HOME
+1. Save the invoice.scm file **and** the invoice.css file in your GNC_DATA_HOME
   - At the time of writing, that's one of the following folders:
     - Linux: /home/`<username>`/.local/share/gnucash
     - Windows: %APPDATA%\GnuCash
